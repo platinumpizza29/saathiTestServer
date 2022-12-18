@@ -1,0 +1,21 @@
+{
+  "name": "saathitestserver",
+  "version": "1.0.0",
+  "description": "saathi test server",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Keyur Bilgi",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1274.0",
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "mongoose": "^6.8.0",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.20"
+  }
+}
