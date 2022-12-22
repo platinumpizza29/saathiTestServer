@@ -29,29 +29,32 @@ const goalSchema = new mongoose.Schema({
 
 const Goal = mongoose.model("Goals", goalSchema);
 
+var durationAmount;
+var endDate;
+
 var calcEndDate = (duration, type, createTime) => {
   var goalDate = new Date(createTime);
   var date = new Date();
   if (type == "weeks") {
-    return date.setDate(goalDate + 7 * duration);
+    endDate = date.setDate(goalDate + 7 * duration);
   } else if (type == "months") {
-    return date.setDate(goalDate + 31 * duration);
+    endDate = date.setDate(goalDate + 31 * duration);
   } else if (type == "years") {
-    return date.setDate(goalDate + 365 * duration);
+    endDate = date.setDate(goalDate + 365 * duration);
   }
 };
 
 var calcDurationAmount = (type, amount, duration) => {
   var intAmount = parseInt(amount);
   var newDuration = parseInt(duration);
-  if (type == "weeks") {
+  if (type == "WEEKS") {
     return intAmount / newDuration;
-  } else if (type == "month") {
+  } else if (type == "MONTHS") {
     if (newDuration == 1) {
       return intAmount / 4;
     }
     return intAmount / newDuration;
-  } else if (type == "year") {
+  } else if (type == "YEARS") {
     if (newDuration == 1) {
       return intAmount / 12;
     }
@@ -65,35 +68,34 @@ router.post("/createGoal", (req, res) => {
   // need to add method for goal End Date
   //need to add goal Status : default -> Active
   //need to change amount and duration from string to int
-  console.log(req.body);
   var goalName = req.body.goalName;
   var goalImageUrl = req.body.goalImageUrl;
   var goalAmount = req.body.goalAmount;
   var goalDuration = req.body.goalDuration;
   var goalDurationType = req.body.goalDurationType;
-  var goalDurationAmount = calcDurationAmount(
+  // create a method
+  var goalCreatedDate = req.body.goalCreatedDate; // calculate end date
+  var goalCurrency = req.body.goalCurrency;
+  var goalState = "Active";
+  var durationAmount = calcDurationAmount(
     goalDurationType,
     goalAmount,
     goalDuration
-  ); // create a method
-  var goalCreatedDate = req.body.goalCreatedDate;
-  var goalEndDate = calcEndDate(
-    goalDuration,
-    goalDurationType,
-    goalCreatedDate
-  ); // calculate end date
-  var goalCurrency = req.body.goalCurrency;
-  var goalState = "Active";
+  );
+  console.log("====================================");
+  console.log(durationAmount);
+  console.log("====================================");
+  calcEndDate(goalDuration, goalDurationType, goalCreatedDate);
   const newGoal = new Goal({
     goalName: goalName,
     goalImageUrl: goalImageUrl,
     goalAmount: goalAmount,
     goalCurrency: goalCurrency,
-    goalDurationAmount: goalDurationAmount,
+    goalDurationAmount: durationAmount,
     goalDuration: goalDuration,
     goalDurationType: goalDurationType,
     goalCreatedDate: goalCreatedDate,
-    goalEndDate: goalEndDate,
+    goalEndDate: endDate,
     goalState: goalState,
   })
     .save()
@@ -107,8 +109,24 @@ router.post("/createGoal", (req, res) => {
     );
 });
 
-router.post("/updatePost", (req, res) => {
+router.post("/updateGoal", (req, res) => {
   // this is to update a specific goal
+  var status = req.body.status;
+  var id = req.body.id;
+  console.log("====================================");
+  console.log(req.body);
+  console.log("====================================");
+  Goal.findOneAndUpdate({ id: id }, { goalState: status }, (err, data) => {
+    if (err) {
+      console.log("====================================");
+      console.log(err);
+      console.log("====================================");
+    } else {
+      console.log("====================================");
+      console.log(data);
+      console.log("====================================");
+    }
+  }).clone();
 });
 
 router.post("/deleteGoal", (req, res) => {
@@ -135,6 +153,19 @@ router.get("/allGoals", (req, res) => {
   })
     .clone()
     .catch((err) => console.log("Some Error Occurred", err));
+});
+
+router.post("/findOneGoal", (req, res) => {
+  var id = req.body.id;
+  Goal.findById(id, (err, goal) => {
+    if (!err) {
+      res.send(goal);
+    } else {
+      console.log("====================================");
+      console.log(err);
+      console.log("====================================");
+    }
+  });
 });
 
 module.exports = router;
