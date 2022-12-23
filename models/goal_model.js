@@ -29,18 +29,15 @@ const goalSchema = new mongoose.Schema({
 
 const Goal = mongoose.model("Goals", goalSchema);
 
-var durationAmount;
-var endDate;
-
 var calcEndDate = (duration, type, createTime) => {
   var goalDate = new Date(createTime);
   var date = new Date();
-  if (type == "weeks") {
-    endDate = date.setDate(goalDate + 7 * duration);
-  } else if (type == "months") {
-    endDate = date.setDate(goalDate + 31 * duration);
-  } else if (type == "years") {
-    endDate = date.setDate(goalDate + 365 * duration);
+  if (type == "WEEKS") {
+    return goalDate.setDate(goalDate + 7 * duration);
+  } else if (type == "MONTHS") {
+    return goalDate.setDate(goalDate + 31 * duration);
+  } else if (type == "YEARS") {
+    return goalDate.setDate(goalDate + 365 * duration);
   }
 };
 
@@ -82,10 +79,7 @@ router.post("/createGoal", (req, res) => {
     goalAmount,
     goalDuration
   );
-  console.log("====================================");
-  console.log(durationAmount);
-  console.log("====================================");
-  calcEndDate(goalDuration, goalDurationType, goalCreatedDate);
+  var endDate = calcEndDate(goalDuration, goalDurationType, goalCreatedDate);
   const newGoal = new Goal({
     goalName: goalName,
     goalImageUrl: goalImageUrl,
@@ -114,19 +108,23 @@ router.post("/updateGoal", (req, res) => {
   var status = req.body.status;
   var id = req.body.id;
   console.log("====================================");
-  console.log(req.body);
+  console.log(req.body.id);
   console.log("====================================");
-  Goal.findOneAndUpdate({ id: id }, { goalState: status }, (err, data) => {
-    if (err) {
-      console.log("====================================");
-      console.log(err);
-      console.log("====================================");
-    } else {
-      console.log("====================================");
-      console.log(data);
-      console.log("====================================");
+  var updatedGoal = Goal.findOneAndUpdate(
+    { _id: id },
+    { goalState: status },
+    (err, data) => {
+      if (err) {
+        console.log("====================================");
+        console.log(err);
+        console.log("====================================");
+      } else {
+        console.log("====================================");
+        console.log(data);
+        console.log("====================================");
+      }
     }
-  }).clone();
+  ).clone();
 });
 
 router.post("/deleteGoal", (req, res) => {
